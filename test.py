@@ -1,8 +1,6 @@
 import cv2
 import numpy as np
 
-import cv2
-
 # Load the image from your local directory
 image_path = '/Users/ryanmondong/Downloads/IMG_2667.JPG'
 img = cv2.imread(image_path)
