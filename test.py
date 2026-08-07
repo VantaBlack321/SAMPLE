@@ -1,18 +1,20 @@
 import cv2
 import numpy as np
 
-img = cv2.imread("IMG_2667.JPG")
-print(type(img)) 
-print(img.shape)  
+import cv2
 
-# image = np.zeros((500, 500, 3), dtype=np.uint8)
+# Load the image from your local directory
+image_path = '/Users/ryanmondong/Downloads/IMG_2667.JPG'
+img = cv2.imread(image_path)
 
-# cv2.rectangle(image, (50, 50), (200, 150), (0, 255, 0), thickness=2)
-
-# cv2.circle(image, (300,100), 30, (0, 0, 225), thickness=-1)
-
-# cv2.imshow('OpenCV Example', image)
-
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+# Check if image loaded successfully
+if img is None:
+    print("Error: Could not load image. Check the file path.")
+else:
+    # Display the image in a window
+    cv2.imshow('iPhone Photo', img)
+    
+    # Wait until a key is pressed, then close the window
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
 
