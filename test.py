@@ -5,6 +5,12 @@ import numpy as np
 image_path = '/Users/ryanmondong/Downloads/IMG_2667.JPG'
 img = cv2.imread(image_path)
 
+# numpy_row = y
+# numpy_col = x
+
+# Example: Store Photopea (x, y) coordinates
+# ref_points = [(x1, y1), (x2, y2), (x3, y3), (x4, y4)]
+
 # Check if image loaded successfully
 if img is None:
     print("Error: Could not load image. Check the file path.")
