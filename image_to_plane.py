@@ -3,7 +3,7 @@ import numpy as np
 import open3d as o3d
 
 # Load the image
-img = cv2.imread('image.jpg')
+img = cv2.imread('/Users/ryanmondong/Downloads/IMG_2667.JPG')
 img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB) # Convert to RGB for visualization
 
 h, w, _ = img.shape

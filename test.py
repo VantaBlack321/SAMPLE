@@ -1,55 +1,96 @@
 import cv2
 import numpy as np
 
-# ==========================================
-# 1. LOAD IMAGE
-# ==========================================
-# Replace 'your_image.jpg' with the path to your image file
-image_path = '/Users/ryanmondong/Downloads/IMG_2667.JPG'
-image = cv2.imread(image_path)
+# Load image FIRST
+img = cv2.imread('/Users/ryanmondong/Downloads/IMG_2667.JPG')
 
-if image is None:
-    raise FileNotFoundError(f"Could not load image from path: {image_path}")
+if img is None:
+    raise FileNotFoundError("Could not load image. Check the file path.")
 
 # Get image dimensions
-height, width, channels = image.shape
+height, width, channels = img.shape
 print(f"Loaded image size: {width}x{height}")
 
-# ==========================================
-# 2. DEFINE CAMERA INTRINSICS & DEPTH
-# ==========================================
-# If you don't have accurate calibration data, approximate using the image dimensions.
-# Ideally, obtain these via cv2.calibrateCamera().
-focal_length_x = width * 0.8  # fx
-focal_length_y = width * 0.8  # fy
-principal_point_x = width / 2.0  # cx
-principal_point_y = height / 2.0  # cy
+# Camera parameters
+focal_length_x = 6.3
+focal_length_y = 4.6
 
-# Define the target 2D pixel coordinate (u, v)
-pixel_u = 400  # Horizontal pixel coordinate
-pixel_v = 300  # Vertical pixel coordinate
+principal_point_x = width / 2.0
+principal_point_y = height / 2.0
 
-# Define the depth/distance (Z) of the target object from the camera lens
-# (Must be known or estimated, e.g., via depth sensors or assumptions like Z=1)
-depth_Z = 5  # distance in meters
+depth_Z = 5.0  # meters
 
-# ==========================================
-# 3. 2D TO 3D COORDINATE CONVERSION
-# ==========================================
-# Formula derived from inversion of the pinhole camera equation:
-# X = (u - cx) * Z / fx
-# Y = (v - cy) * Z / fy
-camera_X = (pixel_u - principal_point_x) * depth_Z / focal_length_x
-camera_Y = (pixel_v - principal_point_y) * depth_Z / focal_length_y
+# Initial target pixel
+pixel_u = 400
+pixel_v = 300
 
-print(f"\n--- Conversion Results ---")
-print(f"2D Pixel Input: (u={pixel_u}, v={pixel_v}) at Depth Z={depth_Z}m")
+
+def pixel_to_3d(u, v):
+    camera_X = (u - principal_point_x) * depth_Z / focal_length_x
+    camera_Y = (v - principal_point_y) * depth_Z / focal_length_y
+
+    return camera_X, camera_Y, depth_Z
+
+
+# Convert initial pixel
+camera_X, camera_Y, camera_Z = pixel_to_3d(pixel_u, pixel_v)
+
+print("\n--- Conversion Results ---")
 print(
-    f"3D Camera Coordinates: (X={camera_X:.4f}m, Y={camera_Y:.4f}m, Z={depth_Z:.4f}m)"
+    f"2D Pixel Input: (u={pixel_u}, v={pixel_v}) "
+    f"at Depth Z={depth_Z}m"
+)
+print(
+    f"3D Camera Coordinates: "
+    f"(X={camera_X:.4f}m, "
+    f"Y={camera_Y:.4f}m, "
+    f"Z={camera_Z:.4f}m)"
 )
 
-# Optional: Draw a circle over the targeted 2D point and display the image
-cv2.circle(image, (pixel_u, pixel_v), 7, (0, 0, 255), -1)
-cv2.imshow("Targeted Point", image)
+
+def click_event(event, x, y, flags, param):
+
+    # img = cv2.imread('image.jpg', cv2.IMREAD_GRAYSCALE)
+    # x, y = np.where(img == 0)
+    # black_pixels = list(zip(x, y))
+
+    # for x, y in black_pixels:
+    #     print(f'X: {x}, Y: {y}')
+
+    if event == cv2.EVENT_LBUTTONDOWN:
+        print(f"\nClicked Pixel Coordinates: (u={x}, v={y})")
+
+        camera_X, camera_Y, camera_Z = pixel_to_3d(x, y)
+
+        print(
+            f"Converted 3D Coordinates: "
+            f"(X={camera_X:.4f}m, "
+            f"Y={camera_Y:.4f}m, "
+            f"Z={camera_Z:.4f}m)"
+        )
+
+        # Draw clicked point
+        cv2.circle(img, (x, y), 5, (255, 0, 0), -1)
+
+        # Add coordinate text
+        font = cv2.FONT_HERSHEY_SIMPLEX
+        cv2.putText(
+            img,
+            f"{x},{y}",
+            (x + 5, y - 5),
+            font,
+            3.0,
+            (255, 0, 0),
+            1
+        )
+
+        cv2.imshow("Targeted Point", img)
+
+# Draw initial target
+cv2.circle(img, (pixel_u, pixel_v), 7, (0, 0, 255), -1)
+
+cv2.imshow("Targeted Point", img)
+cv2.setMouseCallback("Targeted Point", click_event)
+
 cv2.waitKey(0)
 cv2.destroyAllWindows()

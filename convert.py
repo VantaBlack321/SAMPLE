@@ -1,19 +1,17 @@
+import cv2
 import numpy as np
-from PIL import Image
 
-# Load image and convert to RGB
-img = Image.open('/Users/ryanmondong/Downloads/IMG_2667.JPG').convert("RGB")
-arr = np.array(img)
+# 1. Load the image in grayscale
+img = cv2.imread('/Users/ryanmondong/Downloads/IMG_2667.JPG', cv2.IMREAD_GRAYSCALE)
 
-# Define target RGB color (e.g., pure red)
-target_color = np.array([255, 0, 0])
+# 2. Find all coordinates where pixel value is black (0)
+# Note: np.argwhere returns a list of [y, x] (row, col) indices
+black_pixels = np.argwhere(img == 0)
 
-# Find all coordinates where pixel matches target color
-y_indices, x_indices = np.where(np.all(arr == target_color, axis=-1))
+# Optional: If you strictly need (x, y) format instead of (y, x)
+# black_pixels_xy = black_pixels[:, [1, 0]]
 
-# Combine into (x, y) pairs
-coordinates = list(zip(x_indices, y_indices))
+# 3. Write down/save coordinates to a text file
+np.savetxt('black_pixel_coordinates.txt', black_pixels, fmt='%d')
 
-# Print out the coordinates
-for coord in coordinates:
-  print(coord)
+print(f'Total black pixels found: {len(black_pixels)}')
