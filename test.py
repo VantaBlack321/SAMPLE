@@ -31,7 +31,7 @@ pixel_v = 300  # Vertical pixel coordinate
 
 # Define the depth/distance (Z) of the target object from the camera lens
 # (Must be known or estimated, e.g., via depth sensors or assumptions like Z=1)
-depth_Z = 2.5  # distance in meters
+depth_Z = 5  # distance in meters
 
 # ==========================================
 # 3. 2D TO 3D COORDINATE CONVERSION
