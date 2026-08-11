@@ -2,14 +2,14 @@ import cv2
 import os
  
 # Load the image
-img = cv2.imread("Original.png")
+img = cv2.imread("/Users/ryanmondong/Downloads/IMG_2667.JPG")
 img_h, img_w, _ = img.shape  # Get image dimensions
  
 # Patch size
 patch_w, patch_h = 200, 200  # Adjust as needed
  
 # Create output directory if it doesn't exist
-output_dir = "patches"
+output_dir = "/Users/ryanmondong/Downloads/patches"
 os.makedirs(output_dir, exist_ok=True)
  
 # Counter for patch numbering
