@@ -16,6 +16,7 @@ def unwarp_pipe_surface(image_path, r, xc):
         raise FileNotFoundError("Input image not found.")
 
     h, w, c = img.shape
+    print(f"Image original shape: {h}x{w}")
 
     # Calculate the width of the flattened surface (arc length)
     # Full semi-cylinder width = pi * r
@@ -54,7 +55,7 @@ def unwarp_pipe_surface(image_path, r, xc):
 if __name__ == "__main__":
     # Example parameters (adjust these to match your specific image scale)
     PIPE_RADIUS_PX = 300  # Pipe radius in pixels
-    CENTER_AXIS_X = 300  # X-coordinate where the pipe center sits
+    CENTER_AXIS_X = 1512  # X-coordinate where the pipe center sits
 
     # Run the unwarping function
     try:
