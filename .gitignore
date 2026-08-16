@@ -1,0 +1,21 @@
+# Virtual Environments
+open3d_env/
+.venv/
+venv/
+env/
+
+# Python Cache & Compiled Files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Operating System Metadata
+.DS_Store
+Thumbs.db
+
+# IDE and Editor Specific Files
+.vscode/
+.idea/
+*.swp
+*.swo
