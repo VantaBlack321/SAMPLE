@@ -47,15 +47,7 @@ print(
     f"Z={camera_Z:.4f}m)"
 )
 
-
 def click_event(event, x, y, flags, param):
-
-    # img = cv2.imread('image.jpg', cv2.IMREAD_GRAYSCALE)
-    # x, y = np.where(img == 0)
-    # black_pixels = list(zip(x, y))
-
-    # for x, y in black_pixels:
-    #     print(f'X: {x}, Y: {y}')
 
     if event == cv2.EVENT_LBUTTONDOWN:
         print(f"\nClicked Pixel Coordinates: (u={x}, v={y})")

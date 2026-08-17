@@ -3,6 +3,10 @@ import os
  
 # Load the image
 img = cv2.imread("/Users/ryanmondong/Downloads/IMG_2667.JPG")
+
+if img is None:
+    raise FileNotFoundError("Could not load image. Check the file path.")
+
 img_h, img_w, _ = img.shape  # Get image dimensions
  
 # Patch size

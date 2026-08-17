@@ -4,6 +4,9 @@ import numpy as np
 # 1. Load the image
 img = cv2.imread("/Users/ryanmondong/Downloads/IMG_2667.JPG")
 
+if img is None:
+    raise FileNotFoundError("Could not load image. Check the file path.")
+
 # 2. Dimensions and physical constants
 img_width = 3024
 image_height = 4032
