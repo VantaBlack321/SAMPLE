@@ -33,6 +33,29 @@ print(f"Top-left pixel 3D coordinate: ({X[0,0]:.2f}, {Y[0,0]:.2f}, {Z[0,0]:.2f})
 point_cloud_3d = np.vstack((X.ravel(), Y.ravel(), Z.ravel())).T
 print("Flattened 3D points shape:", point_cloud_3d.shape)
 
+cv2.imshow("Patches", img)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+
+def click_event(event, X, Y, Z, flags, param):
+
+    if event == cv2.EVENT_LBUTTONDOWN:
+        cv2.circle(img, (X, Y), 5, (255, 0, 0), -1)
+
+        font = cv2.FONT_HERSHEY_SIMPLEX
+
+        cv2.putText(
+            img,
+            f"{X},{Y}",
+            (X + 5, Y - 5),
+            font,
+            3.0,
+            (255, 0, 0),
+            1
+        )
+
+        cv2.imshow("Targeted Point", img)
+
 # fx = 3272.5
 # fy = 3389.7
 
