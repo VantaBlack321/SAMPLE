@@ -13,41 +13,24 @@ image_height = 4032
 radius = 4.25       # cm
 pipe_length = 43.3  # cm
 
-# 3. Generate pixel grids
-u_grid, v_grid = np.meshgrid(np.arange(img_width), np.arange(image_height))
+# Get image dimensions
+height, width, channels = img.shape
+print(f"Loaded image size: {width}x{height}")
 
-# 4. Map to cylindrical coordinates
-theta = (u_grid / img_width) * 2 * np.pi
-Z = (v_grid / image_height) * pipe_length
-
-# 5. Map to 3D Cartesian coordinates
-X = radius * np.cos(theta)
-Y = radius * np.sin(theta)
-
-# 6. Print structural shape and the specific top-left pixel (Fixed syntax)
-print("X grid shape:", X.shape)  
-print(f"Top-left pixel 3D coordinate: ({X[0,0]:.2f}, {Y[0,0]:.2f}, {Z[0,0]:.2f})")
-
-# 7. Bonus: Combine into a standard 3D Point Cloud array (Shape: 12192768 points, 3 coordinates)
-# This flattens the grids so every row is one single point: [X, Y, Z]
-point_cloud_3d = np.vstack((X.ravel(), Y.ravel(), Z.ravel())).T
-print("Flattened 3D points shape:", point_cloud_3d.shape)
-
-cv2.imshow("Patches", img)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
-
-def click_event(event, X, Y, Z, flags, param):
+def click_event(event, x, y, flags, param):
 
     if event == cv2.EVENT_LBUTTONDOWN:
-        cv2.circle(img, (X, Y), 5, (255, 0, 0), -1)
+        print(f"\nClicked Pixel Coordinates: (u={x}, v={y})")
 
+        # Draw clicked point
+        cv2.circle(img, (x, y), 5, (255, 0, 0), -1)
+
+        # Add coordinate text
         font = cv2.FONT_HERSHEY_SIMPLEX
-
         cv2.putText(
             img,
-            f"{X},{Y}",
-            (X + 5, Y - 5),
+            f"{x},{y}",
+            (x + 5, y - 5),
             font,
             3.0,
             (255, 0, 0),
@@ -56,14 +39,28 @@ def click_event(event, X, Y, Z, flags, param):
 
         cv2.imshow("Targeted Point", img)
 
-# fx = 3272.5
-# fy = 3389.7
+u = 1219
+v = 1342
 
-# cx = 1508
-# cy = 2349
+fx = 3272.5
+fy = 3389.7
 
-# Test_Matrix = np.array([fx, 0, cx],
-#                        [0, fy, cy],
-#                        [0, 0, 1])
+cx = 1508
+cy = 2349
+
+xn = (u - cx) / fx
+yn = (v - cx) / fy
+
+K = np.array([fx, 0, cx],
+             [0, fy, cy],
+             [0, 0, 0])
+
+cv2.imshow("Targeted Point", img)
+cv2.setMouseCallback("Targeted Point", click_event)
+
+cv2.imshow("Patches", img)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+
 
 
