@@ -13,24 +13,24 @@ print(f"Loaded image size: {img_width}x{img_height}")
 # Initialize an empty list to store unlimited coordinates
 clicked_coordinates = []
 
-def mouse_click_callback(event, x, y, flags, param):
+def mouse_click_callback(event, u, v, flags, param):
     """Callback function triggered on mouse events."""
     # Check if the left mouse button was pressed
     if event == cv2.EVENT_LBUTTONDOWN:
         # Append the new (x, y) tuple to our list
-        clicked_coordinates.append((x, y))
+        clicked_coordinates.append((u, v))
         
         # Display coordinate in console
-        print(f"Stored Point {len(clicked_coordinates)}: X={x}, Y={y}")
+        print(f"Stored Point {len(clicked_coordinates)}: U={u}, V={v}")
         
         # Draw a visual anchor (a small solid red circle) on the image
-        cv2.circle(img=display_img, center=(x, y), radius=5, color=(0, 0, 255), thickness=-1)
+        cv2.circle(img=display_img, center=(u, v), radius=5, color=(0, 0, 255), thickness=-1)
 
         font = cv2.FONT_HERSHEY_SIMPLEX
         cv2.putText(
             display_img,
-            f"{x},{y}",
-            (x + 5, y - 5),
+            f"{u},{v}",
+            (u + 5, v - 5),
             font,
             3.0,
             (255, 0, 0),
