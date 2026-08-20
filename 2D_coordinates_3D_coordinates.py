@@ -7,6 +7,12 @@ img_height = 4032
 radius = 4.25       # cm
 pipe_length = 43.3  # cm
 
+fx = 3272.5
+fy = 3389.7
+
+cx = 1508
+cy = 2349
+
 # Get image dimensions
 print(f"Loaded image size: {img_width}x{img_height}")
 
@@ -25,6 +31,16 @@ def mouse_click_callback(event, u, v, flags, param):
         
         # Draw a visual anchor (a small solid red circle) on the image
         cv2.circle(img=display_img, center=(u, v), radius=5, color=(0, 0, 255), thickness=-1)
+
+        p = np.array[([u],
+                      [v],
+                      [1])]
+
+        K = np.array[([fx, 0, cx],
+                      [0, fy, cy],
+                      [0, 0, 1])]
+
+        d = np.linalg.solve(K, p)
 
         font = cv2.FONT_HERSHEY_SIMPLEX
         cv2.putText(
@@ -75,15 +91,7 @@ else:
     print(f"\nSession finished. Total coordinates captured: {len(clicked_coordinates)}")
     print("Coordinates List:", clicked_coordinates)
 
-fx = 3272.5
-fy = 3389.7
 
-cx = 1508
-cy = 2349
-
-K = np.array[([fx, 0, cx],
-             [0, fy, cy],
-             [0, 0, 1])]
 
 
 
