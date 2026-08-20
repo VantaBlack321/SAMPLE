@@ -75,18 +75,15 @@ else:
     print(f"\nSession finished. Total coordinates captured: {len(clicked_coordinates)}")
     print("Coordinates List:", clicked_coordinates)
 
-# fx = 3272.5
-# fy = 3389.7
+fx = 3272.5
+fy = 3389.7
 
-# cx = 1508
-# cy = 2349
+cx = 1508
+cy = 2349
 
-# xn = (u - cx) / fx
-# yn = (v - cx) / fy
-
-# K = np.array([fx, 0, cx],
-#              [0, fy, cy],
-#              [0, 0, 0])
+K = np.array[([fx, 0, cx],
+             [0, fy, cy],
+             [0, 0, 1])]
 
 
 
