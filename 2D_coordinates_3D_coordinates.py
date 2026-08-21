@@ -32,13 +32,17 @@ def mouse_click_callback(event, u, v, flags, param):
         # Draw a visual anchor (a small solid red circle) on the image
         cv2.circle(img=display_img, center=(u, v), radius=5, color=(0, 0, 255), thickness=-1)
 
-        p = np.array[([u],
-                      [v],
-                      [1])]
+        p = np.array([
+            [u],
+            [v],
+            [1]
+        ])
 
-        K = np.array[([fx, 0, cx],
-                      [0, fy, cy],
-                      [0, 0, 1])]
+        K = np.array([
+            [fx, 0, cx],
+            [0, fy, cy],
+            [0, 0, 1]
+        ])
 
         d = np.linalg.solve(K, p)
 
