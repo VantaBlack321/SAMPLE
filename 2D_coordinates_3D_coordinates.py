@@ -19,6 +19,12 @@ print(f"Loaded image size: {img_width}x{img_height}")
 # Initialize an empty list to store unlimited coordinates
 clicked_coordinates = []
 
+K = np.array([
+    [fx, 0, cx],
+    [0, fy, cy],
+    [0, 0, 1]
+])
+
 def mouse_click_callback(event, u, v, flags, param):
     """Callback function triggered on mouse events."""
     # Check if the left mouse button was pressed
@@ -36,12 +42,6 @@ def mouse_click_callback(event, u, v, flags, param):
             [u],
             [v],
             [1]
-        ])
-
-        K = np.array([
-            [fx, 0, cx],
-            [0, fy, cy],
-            [0, 0, 1]
         ])
 
         d = np.linalg.solve(K, p)
