@@ -99,7 +99,7 @@ else:
     # Print total coordinates collected
     print(f"\nSession finished. Total coordinates captured: {len(clicked_coordinates)}")
     print("Coordinates List:", clicked_coordinates)
-    print(p)
+    # print(p)
 
 
 
