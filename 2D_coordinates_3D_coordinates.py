@@ -16,8 +16,10 @@ cy = 2349
 # Get image dimensions
 print(f"Loaded image size: {img_width}x{img_height}")
 
-# Initialize an empty list to store unlimited coordinates
+# collection of all clicked coordinates
 clicked_coordinates = []
+# all homogeneous coordinates you've collected
+homogeneous_coordinates = []
 
 K = np.array([
     [fx, 0, cx],
@@ -30,6 +32,7 @@ def mouse_click_callback(event, u, v, flags, param):
     # Check if the left mouse button was pressed
     if event == cv2.EVENT_LBUTTONDOWN:
         # Append the new (x, y) tuple to our list
+        # one clicked coordinate
         clicked_coordinates.append((u, v))
         
         # Display coordinate in console
@@ -38,16 +41,21 @@ def mouse_click_callback(event, u, v, flags, param):
         # Draw a visual anchor (a small solid red circle) on the image
         cv2.circle(img=display_img, center=(u, v), radius=5, color=(0, 0, 255), thickness=-1)
 
+        # One homogeneous coordinate 
         p = np.array([
             [u],
             [v],
             [1]
         ])
 
+        # 3D 
         d = np.linalg.solve(K, p)
 
         for u, v in clicked_coordinates:
             p.append(([u], [v], [1]))
+
+        # all homogeneous coordinates you've collected
+        homogeneous_coordinates.append(p)
 
         print(p)
 
