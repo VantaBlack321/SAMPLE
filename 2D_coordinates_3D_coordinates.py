@@ -64,6 +64,10 @@ def mouse_click_callback(event, u, v, flags, param):
         # collection of all 3D viewing directions 
         viewing_directions.append(d)
 
+        # P(t) = O + d
+        O = (0,0,0)
+        # t = 
+
         font = cv2.FONT_HERSHEY_SIMPLEX
         cv2.putText(
             display_img,
@@ -112,7 +116,7 @@ else:
     # Print total coordinates collected
     print(f"\nSession finished. Total coordinates captured: {len(clicked_coordinates)}")
     print("Coordinates List:", clicked_coordinates)
-    
+
     print("\nHomogeneous Coordinates:")
 
     for i, p in enumerate(homogeneous_coordinates, start=1):
