@@ -7,10 +7,14 @@ img_height = 4032
 radius = 4.25       # cm
 pipe_length = 43.3  # cm
 
+# focal length width
 fx = 3272.5
+# focal length height
 fy = 3389.7
 
+# Central coordiantes x axis
 cx = 1508
+# Central coordiantes y axis
 cy = 2349
 
 # Get image dimensions
@@ -18,9 +22,12 @@ print(f"Loaded image size: {img_width}x{img_height}")
 
 # collection of all clicked coordinates
 clicked_coordinates = []
-# all homogeneous coordinates you've collected
+# collection of all homogeneous coordinates 
 homogeneous_coordinates = []
+# collection of all 3D viewing directions 
+viewing_directions = []
 
+# Camera Matrix 
 K = np.array([
     [fx, 0, cx],
     [0, fy, cy],
@@ -51,23 +58,22 @@ def mouse_click_callback(event, u, v, flags, param):
         # 3D viewing direction corresponding to that pixel 
         d = np.linalg.solve(K, p)
 
-        # store coordinates u, v toward clicked_coordinates
-        # for u, v in clicked_coordinates:
-            # p.append(([u], [v], [1]))
-
-        # all homogeneous coordinates you've collected
+        # collection of all homogeneous coordinates 
         homogeneous_coordinates.append(p)
 
-        # font = cv2.FONT_HERSHEY_SIMPLEX
-        # cv2.putText(
-        #     display_img,
-        #     f"{u},{v}",
-        #     (u + 5, v - 5),
-        #     font,
-        #     3.0,
-        #     (255, 0, 0),
-        #     1
-        # )
+        # collection of all 3D viewing directions 
+        viewing_directions.append(d)
+
+        font = cv2.FONT_HERSHEY_SIMPLEX
+        cv2.putText(
+            display_img,
+            f"{u},{v}",
+            (u + 5, v - 5),
+            font,
+            3.0,
+            (255, 0, 0),
+            1
+        )
         
         # Update the displayed window with the modified image
         cv2.imshow("Image Window", display_img)
@@ -106,11 +112,17 @@ else:
     # Print total coordinates collected
     print(f"\nSession finished. Total coordinates captured: {len(clicked_coordinates)}")
     print("Coordinates List:", clicked_coordinates)
+    
     print("\nHomogeneous Coordinates:")
 
     for i, p in enumerate(homogeneous_coordinates, start=1):
         print(f"\nPoint {i}:")
         print(f"[[{p[0, 0]}]\n [{p[1, 0]}]\n [{p[2, 0]}]]")
+
+    print("\n Viewing 3D Directions:")
+    for i, d in enumerate(viewing_directions, start=1):
+        print(f"\nPoint {i}:")
+        print(f"[[{d[0, 0]}]\n [{d[1, 0]}]\n [{d[2, 0]}]]")
 
 
 
