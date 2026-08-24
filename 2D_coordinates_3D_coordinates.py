@@ -48,16 +48,15 @@ def mouse_click_callback(event, u, v, flags, param):
             [1]
         ])
 
-        # 3D 
+        # 3D viewing direction corresponding to that pixel 
         d = np.linalg.solve(K, p)
 
-        for u, v in clicked_coordinates:
-            p.append(([u], [v], [1]))
+        # store coordinates u, v toward clicked_coordinates
+        # for u, v in clicked_coordinates:
+            # p.append(([u], [v], [1]))
 
         # all homogeneous coordinates you've collected
         homogeneous_coordinates.append(p)
-
-        print(p)
 
         # font = cv2.FONT_HERSHEY_SIMPLEX
         # cv2.putText(
@@ -107,7 +106,7 @@ else:
     # Print total coordinates collected
     print(f"\nSession finished. Total coordinates captured: {len(clicked_coordinates)}")
     print("Coordinates List:", clicked_coordinates)
-    # print(p)
+    print(homogeneous_coordinates)
 
 
 
