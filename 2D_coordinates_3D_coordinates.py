@@ -106,7 +106,11 @@ else:
     # Print total coordinates collected
     print(f"\nSession finished. Total coordinates captured: {len(clicked_coordinates)}")
     print("Coordinates List:", clicked_coordinates)
-    print(homogeneous_coordinates)
+    print("\nHomogeneous Coordinates:")
+
+    for i, p in enumerate(homogeneous_coordinates, start=1):
+        print(f"\nPoint {i}:")
+        print(f"[[{p[0, 0]}]\n [{p[1, 0]}]\n [{p[2, 0]}]]")
 
 
 
