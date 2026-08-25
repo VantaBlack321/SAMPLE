@@ -65,19 +65,12 @@ def mouse_click_callback(event, u, v, flags, param):
         viewing_directions.append(d)
 
         # P(t) = O + d
+        D = d
         O = (0,0,0)
         # t = 
 
         font = cv2.FONT_HERSHEY_SIMPLEX
-        cv2.putText(
-            display_img,
-            f"{u},{v}",
-            (u + 5, v - 5),
-            font,
-            3.0,
-            (255, 0, 0),
-            1
-        )
+        cv2.putText(display_img, f"{u},{v}", (u + 5, v - 5), font, 3.0, (255, 0, 0), 2)
         
         # Update the displayed window with the modified image
         cv2.imshow("Image Window", display_img)
