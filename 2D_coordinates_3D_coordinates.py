@@ -12,9 +12,9 @@ fx = 3272.5
 # focal length height
 fy = 3389.7
 
-# Central coordiantes x axis
+# Central coordinates x axis
 cx = 1508
-# Central coordiantes y axis
+# Central coordinates y axis
 cy = 2349
 
 # Get image dimensions
