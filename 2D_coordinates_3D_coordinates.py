@@ -123,7 +123,7 @@ else:
         print(f"\nPoint {i}:")
         print(f"[[{p[0, 0]}]\n [{p[1, 0]}]\n [{p[2, 0]}]]")
 
-    print("\n Viewing 3D Directions:")
+    print("\nViewing 3D Directions:")
     for i, d in enumerate(viewing_directions, start=1):
         print(f"\nPoint {i}:")
         print(f"[[{d[0, 0]}]\n [{d[1, 0]}]\n [{d[2, 0]}]]")
