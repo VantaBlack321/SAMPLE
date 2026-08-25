@@ -75,6 +75,8 @@ def mouse_click_callback(event, u, v, flags, param):
         # Update the displayed window with the modified image
         cv2.imshow("Image Window", display_img)
 
+# def calculate_cylinder_axis()
+
 # Load your image (replace with your file path)
 # Learn more on the official OpenCV page or community guides like GeeksforGeeks
 image_path = '/Users/ryanmondong/Downloads/IMG_2667.JPG'
