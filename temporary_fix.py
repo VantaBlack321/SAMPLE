@@ -47,13 +47,37 @@ def mouse_click_callback(event, u, v, flags, param):
         # Draw a clean high-contrast dot
         cv2.circle(display_img, (u, v), 5, (0, 0, 255), -1)  # Red dot
         
-        # Render clear label with vertex letter and coordinates
-        text = f"{letter}: ({u}, {v})"
-        cv2.putText(display_img, text, (u + 10, v - 10), 
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 255), 2, cv2.LINE_AA) # Yellow text with thickness 2
+        # 1. Scale down the font sizes and thickness
+        font = cv2.FONT_HERSHEY_SIMPLEX
+        font_scale = 2.5       # Decreased so text doesn't balloon
+        thickness = 2          # Crisp stroke
+        gap = 35               # Clean pixel gap between "P:" and "(1214, 1345)"
+
+        # Position: place text cleanly offset from clicked point (u, v)
+        start_x = u + 25
+        start_y = v - 15
+
+        # 2. Draw the label letter (Bright Yellow)
+        letter_text = f"{letter}:"
+        cv2.putText(display_img, letter_text, (start_x, start_y), 
+                    font, font_scale, (0, 255, 255), thickness, cv2.LINE_AA)
+
+        # 3. Measure the width with the EXACT SAME font and scale
+        (text_width, _), _ = cv2.getTextSize(letter_text, font, font_scale, thickness)
+
+        # 4. Draw the coordinates in WHITE (0, 255, 255 BGR = Yellow; 255, 255, 255 = White)
+        # Avoid dark blue on black!
+        coords_text = f"({u}, {v})"
+        cv2.putText(display_img, coords_text, (start_x + text_width + gap, start_y), 
+                    font, font_scale, (255, 255, 255), thickness, cv2.LINE_AA)
+
+        # Draw optical center
+        cv2.drawMarker(display_img, (1508, 2349), (0, 255, 0), markerType=cv2.MARKER_CROSS, markerSize=30, thickness=2)
+        cv2.putText(display_img, "Origin (1508, 2349)", (1508 + 20, 2349 + 10), 
+                    cv2.FONT_HERSHEY_SIMPLEX, 3, (0, 255, 0), 2, cv2.LINE_AA)
 
         cv2.imshow("Image Window", display_img)
-        
+
 image_path = '/Users/ryanmondong/Downloads/IMG_2667.JPG'
 original_img = cv2.imread(image_path)
 
