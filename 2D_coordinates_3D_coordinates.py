@@ -1,4 +1,5 @@
 import cv2
+import math
 import numpy as np
 
 # 2. Dimensions and physical constants
@@ -27,6 +28,7 @@ labels = ['P', 'Q', 'R', 'S']
 clicked_coordinates = []
 homogeneous_coordinates = []
 viewing_directions = []
+d_hat = []
 
 # Dictionary to look up specific points by letter: P, Q, R, S
 points_dict = {}
@@ -37,6 +39,32 @@ K = np.array([
     [0, fy, cy],
     [0, 0, 1]
 ])
+
+# Camera Ray
+# P(t) = C + td
+
+C = np.array([
+    [0],
+    [0],
+    [0]
+])
+
+# Temporary estimated point on cylinder axis
+# Real C_cyl goal:
+# C_cyl = one 3D point on the cylinder's central axis
+# Coordinates are measured relative to the camera center C = (0,0,0)
+# Units should be cm
+# Must be estimated from known pipe geometry / reference points,
+# not guessed from the image
+C_cyl = np.array([
+    [0],
+    [0],
+    [10]
+])
+
+# Cylinder Surface Equation
+# x(t) = t * d_hat
+# y = t * d_hat
 
 def mouse_click_callback(event, u, v, flags, param):
     """Callback function triggered on mouse events."""
@@ -61,11 +89,21 @@ def mouse_click_callback(event, u, v, flags, param):
         d = np.linalg.solve(K, p)
         viewing_directions.append(d)
 
+        dx = d[0][0]
+        dy = d[1][0]
+        dz = d[2][0]
+
+        d_magnitude = math.sqrt(dx**2 + dy**2 + dz**2)
+
+        d_hat = d / d_magnitude
+
         # Map directly to letter
         points_dict[letter] = {
             "pixel": (u, v),
             "homogeneous": p,
-            "viewing_direction": d
+            "viewing_direction": d,
+            "d_hat": d_hat,
+            "C_cyl": C_cyl
         }
 
         # 4. Draw marker dot
@@ -128,3 +166,5 @@ else:
         print(f"2D Pixel Coordinate: {data['pixel']}")
         print(f"Homogeneous Coordinates:\n{data['homogeneous']}")
         print(f"Viewing Direction vector (d):\n{data['viewing_direction']}")
+        print(f"Normalized Viewing Direction (d_hat):\n{data['d_hat']}")
+        print(f"Estimated Cylinder Axis Point (C_cyl):\n{data['C_cyl']}")
