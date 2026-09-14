@@ -20,14 +20,18 @@ cy = 2349
 # Get image dimensions
 print(f"Loaded image size: {img_width}x{img_height}")
 
-# collection of all clicked coordinates
+# Labels to assign sequentially
+labels = ['P', 'Q', 'R', 'S']
+
+# Collections
 clicked_coordinates = []
-# collection of all homogeneous coordinates 
 homogeneous_coordinates = []
-# collection of all 3D viewing directions 
 viewing_directions = []
 
-# Camera Matrix 
+# Dictionary to look up specific points by letter: P, Q, R, S
+points_dict = {}
+
+# Camera Matrix
 K = np.array([
     [fx, 0, cx],
     [0, fy, cy],
@@ -36,95 +40,91 @@ K = np.array([
 
 def mouse_click_callback(event, u, v, flags, param):
     """Callback function triggered on mouse events."""
-    # Check if the left mouse button was pressed
-    if event == cv2.EVENT_LBUTTONDOWN:
-        # Append the new (x, y) tuple to our list
-        # one clicked coordinate
-        clicked_coordinates.append((u, v))
-        
-        # Display coordinate in console
-        print(f"Stored Point {len(clicked_coordinates)}: U={u}, V={v}")
-        
-        # Draw a visual anchor (a small solid red circle) on the image
-        cv2.circle(img=display_img, center=(u, v), radius=5, color=(0, 0, 255), thickness=-1)
+    # Only capture up to 4 points (P, Q, R, S)
+    if event == cv2.EVENT_LBUTTONDOWN and len(clicked_coordinates) < len(labels):
+        idx = len(clicked_coordinates)
+        letter = labels[idx]
 
-        # One homogeneous coordinate 
+        # 1. Store pixel coordinate
+        clicked_coordinates.append((u, v))
+        print(f"Stored Point {letter} ({idx + 1}): U={u}, V={v}")
+
+        # 2. Compute Homogeneous Coordinate
         p = np.array([
             [u],
             [v],
             [1]
         ])
-
-        # 3D viewing direction corresponding to that pixel 
-        d = np.linalg.solve(K, p)
-
-        # collection of all homogeneous coordinates 
         homogeneous_coordinates.append(p)
 
-        # collection of all 3D viewing directions 
+        # 3. Compute 3D viewing direction vector: d = K^-1 * p
+        d = np.linalg.solve(K, p)
         viewing_directions.append(d)
 
-        # P(t) = O + d
-        D = d
-        O = (0,0,0)
-        # t = 
+        # Map directly to letter
+        points_dict[letter] = {
+            "pixel": (u, v),
+            "homogeneous": p,
+            "viewing_direction": d
+        }
 
+        # 4. Draw marker dot
+        cv2.circle(display_img, (u, v), 5, (0, 0, 255), -1)
+
+        # 5. Render clean labels (P, Q, R, S) and coordinate text
         font = cv2.FONT_HERSHEY_SIMPLEX
-        cv2.putText(display_img, f"{u},{v}", (u + 5, v - 5), font, 3.0, (255, 0, 0), 2)
-        
-        # Update the displayed window with the modified image
+        font_scale = 2.5
+        thickness = 2
+        gap = 35
+        start_x = u + 25
+        start_y = v - 15
+
+        # Draw Yellow Letter
+        letter_text = f"{letter}:"
+        cv2.putText(display_img, letter_text, (start_x, start_y),
+                    font, font_scale, (0, 255, 255), thickness, cv2.LINE_AA)
+
+        # Measure text width to cleanly position coordinates
+        (text_width, _), _ = cv2.getTextSize(letter_text, font, font_scale, thickness)
+
+        # Draw White Coordinates
+        coords_text = f"({u}, {v})"
+        cv2.putText(display_img, coords_text, (start_x + text_width + gap, start_y),
+                    font, font_scale, (255, 255, 255), thickness, cv2.LINE_AA)
+
+        # Draw Optical Center Marker
+        cv2.drawMarker(display_img, (cx, cy), (0, 255, 0), markerType=cv2.MARKER_CROSS, markerSize=30, thickness=2)
+        cv2.putText(display_img, f"Origin ({cx}, {cy})", (cx + 20, cy + 10),
+                    cv2.FONT_HERSHEY_SIMPLEX, 3, (0, 255, 0), 2, cv2.LINE_AA)
+
         cv2.imshow("Image Window", display_img)
 
-# def calculate_cylinder_axis()
-
-# Load your image (replace with your file path)
-# Learn more on the official OpenCV page or community guides like GeeksforGeeks
 image_path = '/Users/ryanmondong/Downloads/IMG_2667.JPG'
 original_img = cv2.imread(image_path)
 
 if original_img is None:
     print("Error: Could not load image. Check the file path.")
 else:
-    # Create a copy so we don't permanently alter the source data
     display_img = original_img.copy()
 
-    # Create a named window (essential for binding the callback)
     cv2.namedWindow("Image Window")
-
-    # Bind our custom callback function to the window
     cv2.setMouseCallback("Image Window", mouse_click_callback)
-
-    # Initial image display
     cv2.imshow("Image Window", display_img)
 
-    print("Click on the image to store coordinates. Press 'ESC' or 'q' to exit.")
-    
-    # Keep the window open until a termination key is pressed
+    print("Click on the image to store coordinates (P, Q, R, S). Press 'ESC' or 'q' to exit.")
+
     while True:
         key = cv2.waitKey(1) & 0xFF
-        if key == 27 or key == ord('q'):  # 27 is the ASCII code for ESC
+        if key == 27 or key == ord('q'):
             break
 
-    # Clean up and close all GUI windows safely
     cv2.destroyAllWindows()
 
-    # Print total coordinates collected
     print(f"\nSession finished. Total coordinates captured: {len(clicked_coordinates)}")
-    print("Coordinates List:", clicked_coordinates)
 
-    print("\nHomogeneous Coordinates:")
-
-    for i, p in enumerate(homogeneous_coordinates, start=1):
-        print(f"\nPoint {i}:")
-        print(f"[[{p[0, 0]}]\n [{p[1, 0]}]\n [{p[2, 0]}]]")
-
-    print("\nViewing 3D Directions:")
-    for i, d in enumerate(viewing_directions, start=1):
-        print(f"\nPoint {i}:")
-        print(f"[[{d[0, 0]}]\n [{d[1, 0]}]\n [{d[2, 0]}]]")
-
-
-
-
-
-
+    # Print out results organized by letter
+    for letter, data in points_dict.items():
+        print(f"\n================ Point {letter} ================")
+        print(f"2D Pixel Coordinate: {data['pixel']}")
+        print(f"Homogeneous Coordinates:\n{data['homogeneous']}")
+        print(f"Viewing Direction vector (d):\n{data['viewing_direction']}")
