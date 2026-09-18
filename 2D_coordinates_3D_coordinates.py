@@ -21,8 +21,11 @@ cy = 2349
 # Get image dimensions
 print(f"Loaded image size: {img_width}x{img_height}")
 
-# Labels to assign sequentially
-labels = ['P', 'Q', 'R', 'S']
+# Target patch labels - use later for P, Q, R, S reconstruction
+# labels = ['P', 'Q', 'R', 'S']
+
+# Current reference measurement labels
+labels = ['m_0', 'm_1', 'm_2', 'm_3']
 
 # Collections
 clicked_coordinates = []
@@ -31,6 +34,16 @@ viewing_directions = []
 
 # Dictionary to look up specific points by letter: P, Q, R, S
 points_dict = {}
+
+# After four clicks, have:
+# points_dict["P"]["d_hat"] → P's normalized direction
+# points_dict["Q"]["d_hat"] → Q's normalized direction
+# points_dict["R"]["d_hat"] → R's normalized direction
+# points_dict["S"]["d_hat"] → S's normalized direction
+
+measurement_labels = ['m_0', 'm_1', 'm_2', 'm_3']
+
+measurement_coordinates = []
 
 # Camera Matrix
 K = np.array([
@@ -70,6 +83,13 @@ C_cyl = np.array([
 # x(t) = t * d_hat
 # y = t * d_hat
 
+reference_spacing = 5.0  # cm
+# Known physical constraint:
+# ||M_1 - M_0|| = reference_spacing
+
+# distance_M0_M1 = np.linalg.norm(M_1 - M_0)
+
+
 def mouse_click_callback(event, u, v, flags, param):
     """Callback function triggered on mouse events."""
     # Only capture up to 4 points (P, Q, R, S)
@@ -89,6 +109,10 @@ def mouse_click_callback(event, u, v, flags, param):
         ])
         homogeneous_coordinates.append(p)
 
+        measurement_idx = len(measurement_coordinates)
+        measurement_label = measurement_labels[measurement_idx] 
+        measurement_coordinates.append((u, v))
+
         # 3. Compute 3D viewing direction vector: d = K^-1 * p
         d = np.linalg.solve(K, p)
         viewing_directions.append(d)
@@ -100,6 +124,25 @@ def mouse_click_callback(event, u, v, flags, param):
         d_magnitude = math.sqrt(dx**2 + dy**2 + dz**2)
 
         d_hat = d / d_magnitude
+
+        # Cylinder Pose
+        # A = np.array([
+        #     [Ax],
+        #     [Ay],
+        #     [Az]
+        # ])
+        # A is a 3D point on the cylinder's center axis
+        
+        # a_hat = np.array([
+        #     [ax],
+        #     [ay],
+        #     [az]
+        # ])
+        # a_hat is the unit direction vector of the cylinder's center axis
+        
+        # Next goal:
+        # Determine A and a_hat using the known pipe geometry,
+        # longitudinal reference lines, and known 5-cm markings.
 
         # Map directly to letter
         points_dict[letter] = {
@@ -171,4 +214,13 @@ else:
         print(f"Homogeneous Coordinates:\n{data['homogeneous']}")
         print(f"Viewing Direction vector (d):\n{data['viewing_direction']}")
         print(f"Normalized Viewing Direction (d_hat):\n{data['d_hat']}")
-        print(f"Estimated Cylinder Axis Point (C_cyl):\n{data['C_cyl']}")
+        # print(f"Estimated Cylinder Axis Point (C_cyl):\n{data['C_cyl']}")
+
+    # Print reference measurement coordinates
+    print("\n================ Reference Measurements ================")
+
+    for measurement_label, coordinate in zip(measurement_labels, measurement_coordinates):
+        u, v = coordinate
+        print(f"{measurement_label}: U={u}, V={v}")
+
+    print(f"Known Physical Spacing: {reference_spacing} cm")
