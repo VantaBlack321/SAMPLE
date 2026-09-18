@@ -28,7 +28,6 @@ labels = ['P', 'Q', 'R', 'S']
 clicked_coordinates = []
 homogeneous_coordinates = []
 viewing_directions = []
-d_hat = []
 
 # Dictionary to look up specific points by letter: P, Q, R, S
 points_dict = {}
@@ -49,13 +48,18 @@ C = np.array([
     [0]
 ])
 
-# Temporary estimated point on cylinder axis
-# Real C_cyl goal:
-# C_cyl = one 3D point on the cylinder's central axis
-# Coordinates are measured relative to the camera center C = (0,0,0)
-# Units should be cm
-# Must be estimated from known pipe geometry / reference points,
-# not guessed from the image
+# Cylinder pose still to determine:
+#
+# A = one known/estimated point on cylinder center axis
+# a_hat = unit direction vector of cylinder axis
+#
+# Determine A and a_hat using:
+# - radius = 4.25 cm
+# - longitudinal reference lines
+# - known 5-cm markings
+#
+# Do NOT estimate cylinder pose from P, Q, R, S.
+
 C_cyl = np.array([
     [0],
     [0],
