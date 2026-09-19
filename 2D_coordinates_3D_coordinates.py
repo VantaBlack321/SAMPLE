@@ -196,7 +196,8 @@ else:
     cv2.setMouseCallback("Image Window", mouse_click_callback)
     cv2.imshow("Image Window", display_img)
 
-    print("Click on the image to store coordinates (P, Q, R, S). Press 'ESC' or 'q' to exit.")
+    # print("Click on the image to store coordinates (P, Q, R, S). Press 'ESC' or 'q' to exit.")
+    print("Click known 5-cm reference markings m_0, m_1, m_2, m_3. Press 'ESC' or 'q' to exit.")
 
     while True:
         key = cv2.waitKey(1) & 0xFF
