@@ -150,7 +150,7 @@ def mouse_click_callback(event, u, v, flags, param):
             "homogeneous": p,
             "viewing_direction": d,
             "d_hat": d_hat,
-            "C_cyl": C_cyl
+            # "C_cyl": C_cyl
         }
 
         # 4. Draw marker dot
