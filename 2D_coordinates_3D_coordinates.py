@@ -73,11 +73,11 @@ C = np.array([
 #
 # Do NOT estimate cylinder pose from P, Q, R, S.
 
-C_cyl = np.array([
-    [0],
-    [0],
-    [10]
-])
+# C_cyl = np.array([
+#     [0],
+#     [0],
+#     [10]
+# ])
 
 # Cylinder Surface Equation
 # x(t) = t * d_hat
