@@ -252,6 +252,19 @@ else:
 
     B = np.vstack((B1, B2))
 
+    # Solve for relative depths using SVD
+    U, S, Vt = np.linalg.svd(B)
+
+    t_relative = Vt[-1]
+
+    # SVD can return the same solution with either sign.
+    # Camera points should be in front of the camera.
+    if np.mean(t_relative) < 0:
+        t_relative = -t_relative
+
+    print("\n================ Relative Depths ================")
+    print("t_relative:", t_relative)
+
     print("\n================ Depth Constraint Matrix ================")
     print(B)
 
