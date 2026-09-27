@@ -45,6 +45,8 @@ measurement_labels = ['m_0', 'm_1', 'm_2', 'm_3']
 
 measurement_coordinates = []
 
+axial_positions = [40.0, 35.0, 30.0, 25.0]  # cm
+
 # Camera Matrix
 K = np.array([
     [fx, 0, cx],
@@ -84,11 +86,29 @@ C = np.array([
 # y = t * d_hat
 
 reference_spacing = 5.0  # cm
+
+# For two consecutive points on the same longitudinal reference line:
+#
+# M_i     = t_i * d_hat_i
+# M_next  = t_next * d_hat_next
+#
+# M_i - M_next = reference_spacing * a_hat
+#
+# Therefore:
+# t_i * d_hat_i - t_next * d_hat_next
+#     = reference_spacing * a_hat
+
 # Known physical constraint:
 # ||M_1 - M_0|| = reference_spacing
 
 # distance_M0_M1 = np.linalg.norm(M_1 - M_0)
 
+# Cylinder center axis:
+# L(s) = A + s * a_hat
+#
+# A     = a 3D point on the cylinder center axis
+# a_hat = unit direction vector of the cylinder center axis
+# s     = parameter that moves along the cylinder axis
 
 def mouse_click_callback(event, u, v, flags, param):
     """Callback function triggered on mouse events."""
@@ -96,6 +116,7 @@ def mouse_click_callback(event, u, v, flags, param):
     if event == cv2.EVENT_LBUTTONDOWN and len(clicked_coordinates) < len(labels):
         idx = len(clicked_coordinates)
         letter = labels[idx]
+        axial_position = axial_positions[idx]
 
         # 1. Store pixel coordinate
         clicked_coordinates.append((u, v))
@@ -151,6 +172,7 @@ def mouse_click_callback(event, u, v, flags, param):
             "viewing_direction": d,
             "d_hat": d_hat,
             # "C_cyl": C_cyl
+            "axial_position": axial_positions
         }
 
         # 4. Draw marker dot
@@ -184,7 +206,7 @@ def mouse_click_callback(event, u, v, flags, param):
 
         cv2.imshow("Image Window", display_img)
 
-image_path = '/Users/ryanmondong/Downloads/IMG_2667.JPG'
+image_path = '/Users/ryanmondong/Desktop/IMG_2667.JPG'
 original_img = cv2.imread(image_path)
 
 if original_img is None:
@@ -225,3 +247,17 @@ else:
         print(f"{measurement_label}: U={u}, V={v}")
 
     print(f"Known Physical Spacing: {reference_spacing} cm")
+
+    print("\n================ Axial Reference Spacing ================")
+
+    for i in range(len(axial_positions) - 1):
+        current_position = axial_positions[i]
+        next_position = axial_positions[i + 1]
+
+        spacing = abs(current_position - next_position)
+
+        print(
+            f"{measurement_labels[i]} ({current_position} cm) -> "
+            f"{measurement_labels[i + 1]} ({next_position} cm): "
+            f"{spacing} cm"
+        )
