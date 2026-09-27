@@ -172,7 +172,7 @@ def mouse_click_callback(event, u, v, flags, param):
             "viewing_direction": d,
             "d_hat": d_hat,
             # "C_cyl": C_cyl
-            "axial_position": axial_positions
+            "axial_position": axial_position
         }
 
         # 4. Draw marker dot
@@ -229,6 +229,37 @@ else:
     cv2.destroyAllWindows()
 
     print(f"\nSession finished. Total coordinates captured: {len(clicked_coordinates)}")
+
+    # Get normalized viewing directions after all 4 points have been clicked
+    d0 = points_dict['m_0']['d_hat'].flatten()
+    d1 = points_dict['m_1']['d_hat'].flatten()
+    d2 = points_dict['m_2']['d_hat'].flatten()
+    d3 = points_dict['m_3']['d_hat'].flatten()
+
+    B1 = np.column_stack((
+    d0,
+    -2 * d1,
+    d2,
+    np.zeros(3)
+    ))
+
+    B2 = np.column_stack((
+        np.zeros(3),
+        d1,
+        -2 * d2,
+        d3
+    ))
+
+    B = np.vstack((B1, B2))
+
+    print("\n================ Depth Constraint Matrix ================")
+    print(B)
+
+    print("\n================ Viewing Directions ================")
+    print("d0:", d0)
+    print("d1:", d1)
+    print("d2:", d2)
+    print("d3:", d3)
 
     # Print out results organized by letter
     for letter, data in points_dict.items():
