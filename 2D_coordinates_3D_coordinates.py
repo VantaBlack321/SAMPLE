@@ -279,6 +279,78 @@ else:
     print(f"||M2 - M1|| = {np.linalg.norm(M2 - M1):.2f} cm")
     print(f"||M3 - M2|| = {np.linalg.norm(M3 - M2):.2f} cm")
 
+    # ========================================================
+    # Next Step: Ray-Cylinder Intersection & Patch Unwrapping
+    # ========================================================
+
+    # Reference orthogonal basis on the cylinder cross-section
+    u_axis = -n_hat
+    u_axis = u_axis - np.dot(u_axis, a_hat) * a_hat
+    u_axis = u_axis / np.linalg.norm(u_axis)
+    v_axis = np.cross(a_hat, u_axis)
+
+    def intersect_ray_cylinder(d_hat, A_anchor, a_hat_dir, R_cyl):
+        """Calculates the 3D surface intersection for a camera ray."""
+        v = np.cross(d_hat, a_hat_dir)
+        w = np.cross(-A_anchor, a_hat_dir)
+
+        c2 = np.dot(v, v)
+        c1 = 2.0 * np.dot(v, w)
+        c0 = np.dot(w, w) - (R_cyl ** 2)
+
+        discriminant = c1**2 - 4.0 * c2 * c0
+        if discriminant < 0:
+            raise ValueError("Ray does not intersect cylinder.")
+
+        t1 = (-c1 - np.sqrt(discriminant)) / (2.0 * c2)
+        t2 = (-c1 + np.sqrt(discriminant)) / (2.0 * c2)
+
+        # Pick the positive root facing the pipe surface
+        t_candidates = [t for t in (t1, t2) if t > 0]
+        t_val = max(t_candidates)
+        P_3d = t_val * d_hat
+        return P_3d
+
+    # Target patch pixel coordinates (Box I corners from your previous run / report)
+    # Example corners: P=(1220, 1349), Q=(1302, 1695), R=(1128, 2857), S=(1247, 2725)
+    patch_pixel_coords = {
+        'P': (1220, 1349),
+        'Q': (1302, 1695),
+        'R': (1128, 2857),
+        'S': (1247, 2725)
+    }
+
+    patch_3d = {}
+    patch_unwrapped = {}
+
+    print("\n================ Reconstructed Patch Corners (P, Q, R, S) ================")
+    for label, (u, v) in patch_pixel_coords.items():
+        p = np.array([[float(u)], [float(v)], [1.0]])
+        d = np.linalg.solve(K, p).flatten()
+        d_hat = d / np.linalg.norm(d)
+
+        # 1. 3D point on cylinder surface
+        P_xyz = intersect_ray_cylinder(d_hat, A, a_hat, radius)
+        patch_3d[label] = P_xyz
+
+        # 2. Convert to cylindrical coordinates (s, z)
+        rel_vec = P_xyz - A
+        z_axial = np.dot(rel_vec, a_hat)
+        radial_proj = rel_vec - z_axial * a_hat
+        theta = np.arctan2(np.dot(radial_proj, v_axis), np.dot(radial_proj, u_axis))
+        s_arc = radius * theta
+
+        patch_unwrapped[label] = (s_arc, z_axial)
+        print(f"{label}: 3D = [{P_xyz[0]:6.2f}, {P_xyz[1]:6.2f}, {P_xyz[2]:6.2f}] cm | Unwrapped (s, z) = ({s_arc:6.2f}, {z_axial:6.2f}) cm")
+
+    # 3. Compute 2D polygon area via Shoelace formula
+    s_pts = np.array([patch_unwrapped[lbl][0] for lbl in ['P', 'Q', 'R', 'S']])
+    z_pts = np.array([patch_unwrapped[lbl][1] for lbl in ['P', 'Q', 'R', 'S']])
+    calc_area = 0.5 * np.abs(np.dot(s_pts, np.roll(z_pts, 1)) - np.dot(z_pts, np.roll(s_pts, 1)))
+
+    print("\n================ Patch Area Result ================")
+    print(f"Calculated Unwrapped Surface Area: {calc_area:.2f} cm^2")
+
     # print("\n================ Depth Constraint Matrix ================")
     # print(B)
 
