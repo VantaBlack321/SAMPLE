@@ -262,6 +262,35 @@ else:
     if np.mean(t_relative) < 0:
         t_relative = -t_relative
 
+    # 1. Scale relative depths to true physical scale (cm)
+    diff_01_rel = t_relative[1] * d1 - t_relative[0] * d0
+    k_scale = reference_spacing / np.linalg.norm(diff_01_rel)
+    t_metric = t_relative * k_scale
+
+    # 2. Compute 3D surface points M_0 through M_3
+    M0 = t_metric[0] * d0
+    M1 = t_metric[1] * d1
+    M2 = t_metric[2] * d2
+    M3 = t_metric[3] * d3
+    M_points = np.vstack([M0, M1, M2, M3])
+
+    # 3. Estimate cylinder axis direction a_hat
+    axis_vector = M3 - M0
+    a_hat = axis_vector / np.linalg.norm(axis_vector)
+
+    print("\n================ Metric Surface Points (cm) ================")
+    for idx, M in enumerate(M_points):
+        print(f"M_{idx}: X={M[0]:.2f}, Y={M[1]:.2f}, Z={M[2]:.2f}")
+
+    print("\n================ Cylinder Axis Direction (a_hat) ===========")
+    print(f"a_hat: [{a_hat[0]:.4f}, {a_hat[1]:.4f}, {a_hat[2]:.4f}]")
+
+    # 4. Verify spacing consistency across intervals
+    print("\n================ Spacing Verification ================")
+    print(f"||M1 - M0|| = {np.linalg.norm(M1 - M0):.2f} cm")
+    print(f"||M2 - M1|| = {np.linalg.norm(M2 - M1):.2f} cm")
+    print(f"||M3 - M2|| = {np.linalg.norm(M3 - M2):.2f} cm")
+
     print("\n================ Relative Depths ================")
     print("t_relative:", t_relative)
 
