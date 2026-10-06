@@ -21,11 +21,8 @@ cy = 2349
 # Get image dimensions
 print(f"Loaded image size: {img_width}x{img_height}")
 
-# Target patch labels - use later for P, Q, R, S reconstruction
-# labels = ['P', 'Q', 'R', 'S']
-
 # Current reference measurement labels
-labels = ['m_0', 'm_1', 'm_2', 'm_3']
+labels = ['m_0', 'm_1', 'm_2', 'm_3', 'P', 'Q', 'R', 'S']
 
 # Collections
 clicked_coordinates = []
@@ -99,61 +96,33 @@ reference_spacing = 5.0  # cm
 
 def mouse_click_callback(event, u, v, flags, param):
     """Callback function triggered on mouse events."""
-    # Only capture up to 4 points (P, Q, R, S)
+    # Only capture up to 8 points (m_0..m_3, P..S)
     if event == cv2.EVENT_LBUTTONDOWN and len(clicked_coordinates) < len(labels):
         idx = len(clicked_coordinates)
         letter = labels[idx]
-        axial_position = axial_positions[idx]
 
         # 1. Store pixel coordinate
         clicked_coordinates.append((u, v))
         print(f"Stored Point {letter} ({idx + 1}): U={u}, V={v}")
 
-        # 2. Compute Homogeneous Coordinate
-        p = np.array([
-            [u],
-            [v],
-            [1]
-        ])
-        homogeneous_coordinates.append(p)
-
-        measurement_idx = len(measurement_coordinates)
-        measurement_label = measurement_labels[measurement_idx] 
-        measurement_coordinates.append((u, v))
-
-        # 3. Compute 3D viewing direction vector: d = K^-1 * p
+        # Compute Homogeneous Coordinate & viewing ray
+        p = np.array([[u], [v], [1]], dtype=np.float64)
         d = np.linalg.solve(K, p)
-        viewing_directions.append(d)
+        d_hat = d / np.linalg.norm(d)
 
-        dx = d[0][0]
-        dy = d[1][0]
-        dz = d[2][0]
-
-        d_magnitude = math.sqrt(dx**2 + dy**2 + dz**2)
-
-        d_hat = d / d_magnitude
-
-        # A is a 3D point on the cylinder's center axis
-        # a_hat is the unit direction vector of the cylinder's center axis
-        
-        # Next goal:
-        # Determine A and a_hat using the known pipe geometry,
-        # longitudinal reference lines, and known 5-cm markings.
-
-        # Map directly to letter
+        # Store in dictionary
         points_dict[letter] = {
             "pixel": (u, v),
             "homogeneous": p,
             "viewing_direction": d,
-            "d_hat": d_hat,
-            # "C_cyl": C_cyl
-            "axial_position": axial_position
+            "d_hat": d_hat
         }
 
-        # 4. Draw marker dot
-        cv2.circle(display_img, (u, v), 5, (0, 0, 255), -1)
+        # 4. Draw marker dot (Red for reference line, Green for Box 1)
+        dot_color = (0, 0, 255) if idx < 4 else (0, 255, 0)
+        cv2.circle(display_img, (u, v), 5, dot_color, -1)
 
-        # 5. Render clean labels (P, Q, R, S) and coordinate text
+        # 5. Render clean labels and coordinate text (Original Styling)
         font = cv2.FONT_HERSHEY_SIMPLEX
         font_scale = 2.5
         thickness = 2
@@ -175,11 +144,16 @@ def mouse_click_callback(event, u, v, flags, param):
                     font, font_scale, (255, 255, 255), thickness, cv2.LINE_AA)
 
         # Draw Optical Center Marker
-        cv2.drawMarker(display_img, (cx, cy), (0, 255, 0), markerType=cv2.MARKER_CROSS, markerSize=30, thickness=2)
-        cv2.putText(display_img, f"Origin ({cx}, {cy})", (cx + 20, cy + 10),
+        cv2.drawMarker(display_img, (int(cx), int(cy)), (0, 255, 0), markerType=cv2.MARKER_CROSS, markerSize=30, thickness=2)
+        cv2.putText(display_img, f"Origin ({int(cx)}, {int(cy)})", (int(cx) + 20, int(cy) + 10),
                     cv2.FONT_HERSHEY_SIMPLEX, 3, (0, 255, 0), 2, cv2.LINE_AA)
 
         cv2.imshow("Image Window", display_img)
+
+        # Prompt user after completing calibration marks
+        if len(clicked_coordinates) == 4:
+            print("\n>>> Reference points m_0 to m_3 recorded!")
+            print(">>> Now click the 4 corners of Box 1 (P -> Q -> R -> S in order)...\n")
 
 image_path = '/Users/ryanmondong/Desktop/IMG_2667.JPG'
 original_img = cv2.imread(image_path)
@@ -311,29 +285,19 @@ else:
         P_3d = t_val * d_hat
         return P_3d
 
-    # Target patch pixel coordinates (Box I corners from your previous run / report)
-    # Example corners: P=(1220, 1349), Q=(1302, 1695), R=(1128, 2857), S=(1247, 2725)
-    patch_pixel_coords = {
-        'P': (1220, 1349),
-        'Q': (1302, 1695),
-        'R': (1128, 2857),
-        'S': (1247, 2725)
-    }
-
+    # Target patch reconstruction from live user clicks (P, Q, R, S)
     patch_3d = {}
     patch_unwrapped = {}
 
     print("\n================ Reconstructed Patch Corners (P, Q, R, S) ================")
-    for label, (u, v) in patch_pixel_coords.items():
-        p = np.array([[float(u)], [float(v)], [1.0]])
-        d = np.linalg.solve(K, p).flatten()
-        d_hat = d / np.linalg.norm(d)
+    for label in ['P', 'Q', 'R', 'S']:
+        d_hat = points_dict[label]['d_hat'].flatten()
 
         # 1. 3D point on cylinder surface
         P_xyz = intersect_ray_cylinder(d_hat, A, a_hat, radius)
         patch_3d[label] = P_xyz
 
-        # 2. Convert to cylindrical coordinates (s, z)
+        # 2. Convert to cylindrical coordinates (s = R * theta, z)
         rel_vec = P_xyz - A
         z_axial = np.dot(rel_vec, a_hat)
         radial_proj = rel_vec - z_axial * a_hat
@@ -343,13 +307,29 @@ else:
         patch_unwrapped[label] = (s_arc, z_axial)
         print(f"{label}: 3D = [{P_xyz[0]:6.2f}, {P_xyz[1]:6.2f}, {P_xyz[2]:6.2f}] cm | Unwrapped (s, z) = ({s_arc:6.2f}, {z_axial:6.2f}) cm")
 
-    # 3. Compute 2D polygon area via Shoelace formula
-    s_pts = np.array([patch_unwrapped[lbl][0] for lbl in ['P', 'Q', 'R', 'S']])
-    z_pts = np.array([patch_unwrapped[lbl][1] for lbl in ['P', 'Q', 'R', 'S']])
+# 3. Compute 2D unwrapped polygon area via Shoelace formula
+    pts_2d = np.array([patch_unwrapped[lbl] for lbl in ['P', 'Q', 'R', 'S']])
+    
+    # Sort vertices counter-clockwise around their geometric centroid to prevent crossing diagonals
+    centroid = np.mean(pts_2d, axis=0)
+    angles = np.arctan2(pts_2d[:, 1] - centroid[1], pts_2d[:, 0] - centroid[0])
+    sort_order = np.argsort(angles)
+    sorted_pts = pts_2d[sort_order]
+
+    s_pts = sorted_pts[:, 0]
+    z_pts = sorted_pts[:, 1]
     calc_area = 0.5 * np.abs(np.dot(s_pts, np.roll(z_pts, 1)) - np.dot(z_pts, np.roll(s_pts, 1)))
+
+    # Ground truth comparison from Notion for Box I (9.3 cm * 6.9 cm)
+    actual_area_cm2 = 64.2
+    abs_area_err = abs(calc_area - actual_area_cm2)
+    pct_area_err = (abs_area_err / actual_area_cm2) * 100.0
 
     print("\n================ Patch Area Result ================")
     print(f"Calculated Unwrapped Surface Area: {calc_area:.2f} cm^2")
+    print(f"Ground Truth Flat Area           : {actual_area_cm2:.2f} cm^2")
+    print(f"Absolute Area Error              : {abs_area_err:.2f} cm^2")
+    print(f"Percentage Error                 : {pct_area_err:.2f}%")
 
     # print("\n================ Depth Constraint Matrix ================")
     # print(B)
