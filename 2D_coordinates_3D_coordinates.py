@@ -253,6 +253,19 @@ else:
     axis_vector = M3 - M0
     a_hat = axis_vector / np.linalg.norm(axis_vector)
 
+    print("\n================ Cylinder Axis Direction (a_hat) ===========")
+    print(f"a_hat: [{a_hat[0]:.4f}, {a_hat[1]:.4f}, {a_hat[2]:.4f}]")
+
+    # Normal vector pointing inward from surface point M0 to the central axis
+    n_dir = -M0 - np.dot(-M0, a_hat) * a_hat
+    n_hat = n_dir / np.linalg.norm(n_dir)
+
+    # Walk inward from surface marker M0 by radius (4.25 cm) to reach center axis A
+    A = M0 + radius * n_hat
+
+    print("\n================ Cylinder Axis Anchor (A) ================")
+    print(f"A: X = {A[0]:.2f}, Y = {A[1]:.2f}, Z = {A[2]:.2f}")
+
     print("\n================ Metric Surface Points (cm) ================")
     for idx, M in enumerate(M_points):
         print(f"M_{idx}: X={M[0]:.2f}, Y={M[1]:.2f}, Z={M[2]:.2f}")
