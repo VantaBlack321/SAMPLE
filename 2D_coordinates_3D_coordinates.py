@@ -294,14 +294,14 @@ else:
     print("\n================ Relative Depths ================")
     print("t_relative:", t_relative)
 
-    print("\n================ Depth Constraint Matrix ================")
-    print(B)
+    # print("\n================ Depth Constraint Matrix ================")
+    # print(B)
 
-    print("\n================ Viewing Directions ================")
-    print("d0:", d0)
-    print("d1:", d1)
-    print("d2:", d2)
-    print("d3:", d3)
+    # print("\n================ Viewing Directions ================")
+    # print("d0:", d0)
+    # print("d1:", d1)
+    # print("d2:", d2)
+    # print("d3:", d3)
 
     # Print out results organized by letter
     for letter, data in points_dict.items():
@@ -313,24 +313,24 @@ else:
         # print(f"Estimated Cylinder Axis Point (C_cyl):\n{data['C_cyl']}")
 
     # Print reference measurement coordinates
-    print("\n================ Reference Measurements ================")
+    # print("\n================ Reference Measurements ================")
 
-    for measurement_label, coordinate in zip(measurement_labels, measurement_coordinates):
-        u, v = coordinate
-        print(f"{measurement_label}: U={u}, V={v}")
+    # for measurement_label, coordinate in zip(measurement_labels, measurement_coordinates):
+    #     u, v = coordinate
+    #     print(f"{measurement_label}: U={u}, V={v}")
 
-    print(f"Known Physical Spacing: {reference_spacing} cm")
+    # print(f"Known Physical Spacing: {reference_spacing} cm")
 
-    print("\n================ Axial Reference Spacing ================")
+    # print("\n================ Axial Reference Spacing ================")
 
-    for i in range(len(axial_positions) - 1):
-        current_position = axial_positions[i]
-        next_position = axial_positions[i + 1]
+    # for i in range(len(axial_positions) - 1):
+    #     current_position = axial_positions[i]
+    #     next_position = axial_positions[i + 1]
 
-        spacing = abs(current_position - next_position)
+    #     spacing = abs(current_position - next_position)
 
-        print(
-            f"{measurement_labels[i]} ({current_position} cm) -> "
-            f"{measurement_labels[i + 1]} ({next_position} cm): "
-            f"{spacing} cm"
-        )
+    #     print(
+    #         f"{measurement_labels[i]} ({current_position} cm) -> "
+    #         f"{measurement_labels[i + 1]} ({next_position} cm): "
+    #         f"{spacing} cm"
+    #     )
