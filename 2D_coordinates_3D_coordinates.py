@@ -331,6 +331,58 @@ else:
     print(f"Absolute Area Error              : {abs_area_err:.2f} cm^2")
     print(f"Percentage Error                 : {pct_area_err:.2f}%")
 
+    # ========================================================
+    # Save Figures for Report / Advisor Deliverables
+    # ========================================================
+    import matplotlib.pyplot as plt
+
+    # Figure 1: Unwrapped Surface (s = R*theta vs z)
+    plt.figure(figsize=(7, 6))
+    patch_poly = np.vstack([sorted_pts, sorted_pts[0]])
+    plt.plot(patch_poly[:, 0], patch_poly[:, 1], 'r-o', label=f'Patch (Area: {calc_area:.2f} cm²)')
+    plt.fill(patch_poly[:, 0], patch_poly[:, 1], 'red', alpha=0.15)
+
+    # Plot the reference line (s = 0)
+    ref_z = [np.dot(M - A, a_hat) for M in M_points]
+    plt.plot([0]*4, ref_z, 'b--s', label='5-cm Axis Markers')
+
+    for lbl in ['P', 'Q', 'R', 'S']:
+        s_val, z_val = patch_unwrapped[lbl]
+        plt.annotate(lbl, (s_val, z_val), textcoords="offset points", xytext=(6, 6))
+
+    plt.title('Unwrapped Cylindrical Surface ($s = R\\theta$ vs $z$)')
+    plt.xlabel('Circumferential Arc Length $s$ (cm)')
+    plt.ylabel('Axial Depth $z$ (cm)')
+    plt.grid(True, linestyle=':', alpha=0.6)
+    plt.legend()
+    plt.axis('equal')
+    plt.savefig('unwrapped_patch.png', dpi=300, bbox_inches='tight')
+    plt.close()
+
+    # Figure 2: 3D Scene (Camera Origin, Cylinder Axis, 3D Points)
+    fig3d = plt.figure(figsize=(8, 7))
+    ax3d = fig3d.add_subplot(111, projection='3d')
+
+    ax3d.scatter(0, 0, 0, color='black', marker='^', s=80, label='Camera Origin (C)')
+
+    axis_s = np.linspace(-2, 35, 30)
+    axis_line = np.array([A + s * a_hat for s in axis_s])
+    ax3d.plot(axis_line[:, 0], axis_line[:, 1], axis_line[:, 2], 'g--', label='Cylinder Axis')
+
+    ax3d.scatter(M_points[:, 0], M_points[:, 1], M_points[:, 2], color='blue', s=50, label='Markers (m0-m3)')
+    patch_coords = np.array([patch_3d[lbl] for lbl in ['P', 'Q', 'R', 'S']])
+    ax3d.scatter(patch_coords[:, 0], patch_coords[:, 1], patch_coords[:, 2], color='red', s=50, label='Patch Corners')
+
+    ax3d.set_xlabel('X (cm)')
+    ax3d.set_ylabel('Y (cm)')
+    ax3d.set_zlabel('Z (cm)')
+    ax3d.set_title('3D Pose and Reconstructed Surface Points')
+    ax3d.legend()
+    plt.savefig('reconstructed_3d_pose.png', dpi=300, bbox_inches='tight')
+    plt.close()
+
+    print("\nSaved deliverable plots to 'unwrapped_patch.png' and 'reconstructed_3d_pose.png'")
+
     # print("\n================ Depth Constraint Matrix ================")
     # print(B)
 
