@@ -307,7 +307,7 @@ else:
     #     print(f"Homogeneous Coordinates:\n{data['homogeneous']}")
     #     print(f"Viewing Direction vector (d):\n{data['viewing_direction']}")
     #     print(f"Normalized Viewing Direction (d_hat):\n{data['d_hat']}")
-        # print(f"Estimated Cylinder Axis Point (C_cyl):\n{data['C_cyl']}")
+    #     print(f"Estimated Cylinder Axis Point (C_cyl):\n{data['C_cyl']}")
 
     # Print reference measurement coordinates
     # print("\n================ Reference Measurements ================")
