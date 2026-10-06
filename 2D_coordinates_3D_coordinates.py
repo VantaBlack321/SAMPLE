@@ -75,16 +75,6 @@ C = np.array([
 #
 # Do NOT estimate cylinder pose from P, Q, R, S.
 
-# C_cyl = np.array([
-#     [0],
-#     [0],
-#     [10]
-# ])
-
-# Cylinder Surface Equation
-# x(t) = t * d_hat
-# y = t * d_hat
-
 reference_spacing = 5.0  # cm
 
 # For two consecutive points on the same longitudinal reference line:
@@ -101,11 +91,8 @@ reference_spacing = 5.0  # cm
 # Known physical constraint:
 # ||M_1 - M_0|| = reference_spacing
 
-# distance_M0_M1 = np.linalg.norm(M_1 - M_0)
-
 # Cylinder center axis:
 # L(s) = A + s * a_hat
-#
 # A     = a 3D point on the cylinder center axis
 # a_hat = unit direction vector of the cylinder center axis
 # s     = parameter that moves along the cylinder axis
@@ -146,19 +133,7 @@ def mouse_click_callback(event, u, v, flags, param):
 
         d_hat = d / d_magnitude
 
-        # Cylinder Pose
-        # A = np.array([
-        #     [Ax],
-        #     [Ay],
-        #     [Az]
-        # ])
         # A is a 3D point on the cylinder's center axis
-        
-        # a_hat = np.array([
-        #     [ax],
-        #     [ay],
-        #     [az]
-        # ])
         # a_hat is the unit direction vector of the cylinder's center axis
         
         # Next goal:
