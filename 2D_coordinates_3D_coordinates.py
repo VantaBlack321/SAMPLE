@@ -291,9 +291,6 @@ else:
     print(f"||M2 - M1|| = {np.linalg.norm(M2 - M1):.2f} cm")
     print(f"||M3 - M2|| = {np.linalg.norm(M3 - M2):.2f} cm")
 
-    print("\n================ Relative Depths ================")
-    print("t_relative:", t_relative)
-
     # print("\n================ Depth Constraint Matrix ================")
     # print(B)
 
@@ -304,12 +301,12 @@ else:
     # print("d3:", d3)
 
     # Print out results organized by letter
-    for letter, data in points_dict.items():
-        print(f"\n================ Point {letter} ================")
-        print(f"2D Pixel Coordinate: {data['pixel']}")
-        print(f"Homogeneous Coordinates:\n{data['homogeneous']}")
-        print(f"Viewing Direction vector (d):\n{data['viewing_direction']}")
-        print(f"Normalized Viewing Direction (d_hat):\n{data['d_hat']}")
+    # for letter, data in points_dict.items():
+    #     print(f"\n================ Point {letter} ================")
+    #     print(f"2D Pixel Coordinate: {data['pixel']}")
+    #     print(f"Homogeneous Coordinates:\n{data['homogeneous']}")
+    #     print(f"Viewing Direction vector (d):\n{data['viewing_direction']}")
+    #     print(f"Normalized Viewing Direction (d_hat):\n{data['d_hat']}")
         # print(f"Estimated Cylinder Axis Point (C_cyl):\n{data['C_cyl']}")
 
     # Print reference measurement coordinates
