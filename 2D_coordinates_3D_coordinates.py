@@ -247,11 +247,12 @@ else:
     print("\n================ Cylinder Axis Direction (a_hat) ===========")
     print(f"a_hat: [{a_hat[0]:.4f}, {a_hat[1]:.4f}, {a_hat[2]:.4f}]")
 
-    # 4. Verify spacing consistency across intervals
-    print("\n================ Spacing Verification ================")
-    print(f"||M1 - M0|| = {np.linalg.norm(M1 - M0):.2f} cm")
-    print(f"||M2 - M1|| = {np.linalg.norm(M2 - M1):.2f} cm")
-    print(f"||M3 - M2|| = {np.linalg.norm(M3 - M2):.2f} cm")
+    # 4. Calibration vs Independent Validation Verification
+    print("\n================ Calibration vs Validation ================")
+    print(f"Calibration Scale Baseline (||M1 - M0||) : {np.linalg.norm(M1 - M0):.2f} cm (Enforced)")
+    print(f"Independent Validation 1   (||M2 - M1||) : {np.linalg.norm(M2 - M1):.2f} cm (Target: 5.00 cm)")
+    print(f"Independent Validation 2   (||M3 - M2||) : {np.linalg.norm(M3 - M2):.2f} cm (Target: 5.00 cm)")
+    print(f"Independent Total Span     (||M3 - M0||) : {np.linalg.norm(M3 - M0):.2f} cm (Target: 15.00 cm)")
 
     # ========================================================
     # Next Step: Ray-Cylinder Intersection & Patch Unwrapping
@@ -336,15 +337,23 @@ else:
     # Ground truth comparison from Notion for Box I (9.3 cm * 6.9 cm) = 64.2
     # Ground truth comparison from Notion for Box II (5.8 cm * 12.5 cm) = 72.5
     # Ground truth comparison from Notion for Box III (11.4 cm * 6 cm) = 68.4
-    actual_area_cm2 = 68.4
-    abs_area_err = abs(calc_area - actual_area_cm2)
-    pct_area_err = (abs_area_err / actual_area_cm2) * 100.0
+    # Compute Reconstructed Dimensions from unwrapped coordinates (s, z)
+    s_vals = pts_2d[:, 0]
+    z_vals = pts_2d[:, 1]
+    recon_width = np.max(s_vals) - np.min(s_vals)
+    recon_height = np.max(z_vals) - np.min(z_vals)
+    recon_rect_area = recon_width * recon_height
 
-    print("\n================ Patch Area Result ================")
-    print(f"Calculated Unwrapped Surface Area: {calc_area:.2f} cm^2")
-    print(f"Ground Truth Flat Area           : {actual_area_cm2:.2f} cm^2")
-    print(f"Absolute Area Error              : {abs_area_err:.2f} cm^2")
-    print(f"Percentage Error                 : {pct_area_err:.2f}%")
+    # Ground truth targets for Box I (Change to Box II or III when testing)
+    actual_width = 9.30
+    actual_height = 6.90
+    actual_area_cm2 = 64.20
+
+    print("\n================ Reconstructed Dimensions & Area ================")
+    print(f"Reconstructed Arc Width (s) : {recon_width:6.2f} cm | Actual: {actual_width:6.2f} cm | Error: {abs(recon_width - actual_width):.2f} cm ({(abs(recon_width - actual_width)/actual_width)*100:.2f}%)")
+    print(f"Reconstructed Axial Depth (z): {recon_height:6.2f} cm | Actual: {actual_height:6.2f} cm | Error: {abs(recon_height - actual_height):.2f} cm ({(abs(recon_height - actual_height)/actual_height)*100:.2f}%)")
+    print(f"Rectangular Area (w * h)    : {recon_rect_area:6.2f} cm² | Actual: {actual_area_cm2:6.2f} cm² | Error: {abs(recon_rect_area - actual_area_cm2):.2f} cm² ({(abs(recon_rect_area - actual_area_cm2)/actual_area_cm2)*100:.2f}%)")
+    print(f"Shoelace Polygon Area       : {calc_area:6.2f} cm² | Actual: {actual_area_cm2:6.2f} cm² | Error: {abs(calc_area - actual_area_cm2):.2f} cm² ({(abs(calc_area - actual_area_cm2)/actual_area_cm2)*100:.2f}%)")
 
     # ========================================================
     # Save Figures for Report / Advisor Deliverables
@@ -363,7 +372,10 @@ else:
 
     for lbl in ['P', 'Q', 'R', 'S']:
         s_val, z_val = patch_unwrapped[lbl]
-        plt.annotate(lbl, (s_val, z_val), textcoords="offset points", xytext=(6, 6))
+        plt.annotate(f"{lbl}: ({s_val:.1f}, {z_val:.1f})", (s_val, z_val),
+                        textcoords="offset points", xytext=(8, 8),
+                        fontsize=9, weight='bold',
+                        bbox=dict(boxstyle="round,pad=0.2", fc="yellow", alpha=0.6))
 
     plt.title('Unwrapped Cylindrical Surface ($s = R\\theta$ vs $z$)')
     plt.xlabel('Circumferential Arc Length $s$ (cm)')
