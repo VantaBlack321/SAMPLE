@@ -320,8 +320,9 @@ else:
     z_pts = sorted_pts[:, 1]
     calc_area = 0.5 * np.abs(np.dot(s_pts, np.roll(z_pts, 1)) - np.dot(z_pts, np.roll(s_pts, 1)))
 
-    # Ground truth comparison from Notion for Box I (9.3 cm * 6.9 cm)
-    actual_area_cm2 = 64.2
+    # Ground truth comparison from Notion for Box I (9.3 cm * 6.9 cm) = 64.2
+    # Ground truth comparison from Notion for Box 2 (5.8 cm * 12.5 cm) = 72.5
+    actual_area_cm2 = 72.5
     abs_area_err = abs(calc_area - actual_area_cm2)
     pct_area_err = (abs_area_err / actual_area_cm2) * 100.0
 
