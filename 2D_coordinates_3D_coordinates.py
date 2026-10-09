@@ -279,11 +279,24 @@ else:
         t1 = (-c1 - np.sqrt(discriminant)) / (2.0 * c2)
         t2 = (-c1 + np.sqrt(discriminant)) / (2.0 * c2)
 
-        # Pick the positive root facing the pipe surface
-        t_candidates = [t for t in (t1, t2) if t > 0]
-        t_val = max(t_candidates)
-        P_3d = t_val * d_hat
-        return P_3d
+        # Find the positive root that stays inside the physical pipe bounds
+        candidates = []
+        for t in (t1, t2):
+            if t > 0:
+                pt = t * d_hat
+                z_axial = np.dot(pt - A_anchor, a_hat_dir)
+                if 0.0 <= z_axial <= pipe_length:
+                    candidates.append((t, pt))
+
+        if candidates:
+            # Pick the farther root inside bounds (inner visible surface looking down the pipe)
+            return candidates[-1][1]
+
+        # Fallback if manual click sits slightly past the boundary rim
+        t_pos = [t for t in (t1, t2) if t > 0]
+        if not t_pos:
+            raise ValueError("No positive intersection found along camera ray.")
+        return min(t_pos) * d_hat
 
     # Target patch reconstruction from live user clicks (P, Q, R, S)
     patch_3d = {}
@@ -307,7 +320,7 @@ else:
         patch_unwrapped[label] = (s_arc, z_axial)
         print(f"{label}: 3D = [{P_xyz[0]:6.2f}, {P_xyz[1]:6.2f}, {P_xyz[2]:6.2f}] cm | Unwrapped (s, z) = ({s_arc:6.2f}, {z_axial:6.2f}) cm")
 
-# 3. Compute 2D unwrapped polygon area via Shoelace formula
+    # Compute 2D unwrapped polygon area via Shoelace formula
     pts_2d = np.array([patch_unwrapped[lbl] for lbl in ['P', 'Q', 'R', 'S']])
     
     # Sort vertices counter-clockwise around their geometric centroid to prevent crossing diagonals
@@ -321,8 +334,9 @@ else:
     calc_area = 0.5 * np.abs(np.dot(s_pts, np.roll(z_pts, 1)) - np.dot(z_pts, np.roll(s_pts, 1)))
 
     # Ground truth comparison from Notion for Box I (9.3 cm * 6.9 cm) = 64.2
-    # Ground truth comparison from Notion for Box 2 (5.8 cm * 12.5 cm) = 72.5
-    actual_area_cm2 = 72.5
+    # Ground truth comparison from Notion for Box II (5.8 cm * 12.5 cm) = 72.5
+    # Ground truth comparison from Notion for Box III (11.4 cm * 6 cm) = 68.4
+    actual_area_cm2 = 68.4
     abs_area_err = abs(calc_area - actual_area_cm2)
     pct_area_err = (abs_area_err / actual_area_cm2) * 100.0
 
@@ -383,44 +397,3 @@ else:
     plt.close()
 
     print("\nSaved deliverable plots to 'unwrapped_patch.png' and 'reconstructed_3d_pose.png'")
-
-    # print("\n================ Depth Constraint Matrix ================")
-    # print(B)
-
-    # print("\n================ Viewing Directions ================")
-    # print("d0:", d0)
-    # print("d1:", d1)
-    # print("d2:", d2)
-    # print("d3:", d3)
-
-    # Print out results organized by letter
-    # for letter, data in points_dict.items():
-    #     print(f"\n================ Point {letter} ================")
-    #     print(f"2D Pixel Coordinate: {data['pixel']}")
-    #     print(f"Homogeneous Coordinates:\n{data['homogeneous']}")
-    #     print(f"Viewing Direction vector (d):\n{data['viewing_direction']}")
-    #     print(f"Normalized Viewing Direction (d_hat):\n{data['d_hat']}")
-    #     print(f"Estimated Cylinder Axis Point (C_cyl):\n{data['C_cyl']}")
-
-    # Print reference measurement coordinates
-    # print("\n================ Reference Measurements ================")
-
-    # for measurement_label, coordinate in zip(measurement_labels, measurement_coordinates):
-    #     u, v = coordinate
-    #     print(f"{measurement_label}: U={u}, V={v}")
-
-    # print(f"Known Physical Spacing: {reference_spacing} cm")
-
-    # print("\n================ Axial Reference Spacing ================")
-
-    # for i in range(len(axial_positions) - 1):
-    #     current_position = axial_positions[i]
-    #     next_position = axial_positions[i + 1]
-
-    #     spacing = abs(current_position - next_position)
-
-    #     print(
-    #         f"{measurement_labels[i]} ({current_position} cm) -> "
-    #         f"{measurement_labels[i + 1]} ({next_position} cm): "
-    #         f"{spacing} cm"
-    #     )
